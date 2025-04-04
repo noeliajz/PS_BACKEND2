@@ -1,0 +1,147 @@
+require("dotenv").config();
+const { validationResult } = require("express-validator");
+const UsuarioModel = require("../models/usuario");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const getAllUser = async (req, res) => {
+  try {
+    const allUsers = await UsuarioModel.find();
+    res.status(200).json({ msg: "Se envían todos los usuarios", allUsers });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: "No se encontraron usuarios" });
+  }
+};
+
+const getOneUser = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const getUser = await UsuarioModel.findOne({ _id: id });
+    if (!getUser) {
+      return res.status(404).json({ msg: "Usuario no encontrado" });
+    }
+    res.status(200).json({ msg: "Usuario encontrado", getUser });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "Error en el servidor" });
+  }
+};
+
+const createUser = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ msg: errors.array() });
+    }
+
+    const { usuario, contrasenia } = req.body;
+    const userExist = await UsuarioModel.findOne({ usuario });
+
+    if (userExist) {
+      return res.status(400).json({ msg: "El usuario ya existe" });
+    }
+
+    const salt = await bcrypt.genSaltSync();
+    const hashedPassword = await bcrypt.hash(contrasenia, salt);
+
+    const newUser = new UsuarioModel({ usuario, contrasenia: hashedPassword });
+    await newUser.save();
+
+    res.status(201).json({ msg: "Usuario creado correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "Error en el servidor" });
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ msg: errors.array() });
+    }
+    
+   
+     const updateUser = await UsuarioModel.findByIdAndUpdate(
+     
+      { _id: req.params.id },
+      req.body,
+      { new: true }
+    );
+    
+    if (!updateUser) {
+      return res.status(404).json({ msg: "Usuario no encontrado" });
+    }
+ 
+    res.status(200).json({ msg: "Usuario actualizado correctamente", updateUser });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "Error en el servidor" });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const userDeleted = await UsuarioModel.findByIdAndDelete({ _id: req.params.id });
+
+    if (!userDeleted) {
+      return res.status(404).json({ msg: "Usuario no encontrado" });
+    }
+
+    res.status(200).json({ msg: "Usuario eliminado correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "Error en el servidor" });
+  }
+};
+
+const loginUser = async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ msg: errors.array() });
+      }
+  
+      const { usuario, contrasenia } = req.body;
+      const userExist = await UsuarioModel.findOne({ usuario });
+  
+      if (!userExist) {
+        return res.status(400).json({ msg: "El usuario no existe" });
+      }
+  
+      const passCheck = await bcrypt.compareSync(contrasenia, userExist.contrasenia);
+      console.log( userExist)
+      if (!passCheck) {
+        return res.status(400).json({ msg: "Usuario y/o contraseña incorrectos" });
+      }
+  
+      const jwPayload = {
+        usuario: {
+          id: userExist.id,
+          username: userExist.usuario,
+        },
+      };
+  
+      const token = jwt.sign(jwPayload, process.env.SECRET_KEY, { expiresIn: "1h" });
+  
+      // Obtener el rol del usuario
+      const role = userExist.role || "user"; // Default "user" si no tiene un rol asignado
+  
+      await UsuarioModel.findByIdAndUpdate(userExist._id, { token });
+  
+      res.status(200).json({ token, role });
+    } catch (error) {
+      console.error("Error en login:", error);
+      res.status(500).json({ msg: "Error en el servidor" });
+    }
+  };
+  
+module.exports = {
+  getAllUser,
+  getOneUser,
+  createUser,
+  updateUser,
+  deleteUser,
+  loginUser,
+};
