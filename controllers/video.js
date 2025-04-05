@@ -13,7 +13,9 @@ const crearVideo = async (req, res) => {
         const nuevoVideo = new Video({
             titulo,
             descripcion,
-            url: req.file.path, // Ruta del archivo subido
+            /* url: req.file.path, */ // Ruta del archivo subido
+            url: `uploads/${req.file.filename}` // NO req.file.path
+
         });
 
         await nuevoVideo.save();
