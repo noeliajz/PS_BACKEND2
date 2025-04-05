@@ -96,7 +96,7 @@ const deleteUser = async (req, res) => {
   }
 };
 
-const loginUser = async (req, res) => {
+/* const loginUser = async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -135,8 +135,45 @@ const loginUser = async (req, res) => {
       console.error("Error en login:", error);
       res.status(500).json({ msg: "Error en el servidor" });
     }
+  }; */
+  
+  const loginUser = async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ msg: errors.array() });
+      }
+  
+      const { usuario, contrasenia } = req.body;
+      const userExist = await UsuarioModel.findOne({ usuario });
+  
+      if (!userExist) {
+        return res.status(400).json({ msg: "El usuario no existe" });
+      }
+  
+      const passCheck = bcrypt.compareSync(contrasenia, userExist.contrasenia);
+      if (!passCheck) {
+        return res.status(400).json({ msg: "Usuario y/o contraseña incorrectos" });
+      }
+  
+      // 🔐 JWT usando _id y usuario
+      const token = jwt.sign(
+        { _id: userExist._id, usuario: userExist.usuario },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+  
+      const role = userExist.role || "user";
+      await UsuarioModel.findByIdAndUpdate(userExist._id, { token });
+  
+      res.status(200).json({ token, role });
+    } catch (error) {
+      console.error("Error en login:", error);
+      res.status(500).json({ msg: "Error en el servidor" });
+    }
   };
   
+
 module.exports = {
   getAllUser,
   getOneUser,
