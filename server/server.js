@@ -2,6 +2,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const conectarbd = require('../dataBase/config');
+const path = require('path');
 
 class Server {
     constructor() {
@@ -9,6 +10,7 @@ class Server {
         this.port = process.env.PORT || 8080;
         this.middleware();
         this.routes();
+        this.app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
     }
 
     middleware() {
