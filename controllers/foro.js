@@ -1,7 +1,7 @@
 const Foro = require("../models/foro");
 
 
-  const crearcomentario = async (req, res) => {
+/*   const crearcomentario = async (req, res) => {
     try {
         const nuevocomentario = new Foro(req.body);
         
@@ -20,36 +20,40 @@ const Foro = require("../models/foro");
         });
     }
 }; 
-
-/* const crearcomentario = async (req, res) => {
+ */
+const crearcomentario = async (req, res) => {
     try {
-        const { comentario } = req.body;
-        
-        // Buscar si el comentario ya existe
-        let comentarioExistente = await comentario.findOne({ comentario });
-        
-        
-
-        // Si el comentario no existe, crearlo
-        const nuevocomentario = new comentario(req.body);
-        await nuevocomentario.save();
-
-        res.status(201).json({
-            mensaje: 'Se creó el comentario con éxito',
-            comentario: nuevocomentario
-        });
+      const { comentario } = req.body;
+  
+      if (!req.user || !req.user._id) {
+        return res.status(401).json({ mensaje: "Usuario no autenticado" });
+      }
+  
+      const nuevocomentario = new Foro({
+        comentario,
+        usuario: req.user._id, // 👈 este es clave
+      });
+  
+      await nuevocomentario.save();
+  
+      const comentarioConUsuario = await Foro.findById(nuevocomentario._id).populate("usuario", "usuario");
+  
+      res.status(201).json({
+        mensaje: "Se creó el comentario con éxito",
+        comentario: comentarioConUsuario,
+      });
     } catch (error) {
-        console.error('Error al crear o actualizar comentario:', error);
-        res.status(400).json({
-            mensaje: 'Error al crear o actualizar comentario',
-            detalles: error.errors || error.message
-        });
+      console.error("Error al crear comentario:", error);
+      res.status(400).json({
+        mensaje: "Error al crear comentario",
+        detalles: error.errors || error.message,
+      });
     }
-}; */
+  };
+  
 
 
-
-const obtenerTodoscomentarios = async (req, res) => {
+/* const obtenerTodoscomentarios = async (req, res) => {
     try {
         const comentarios = await Foro.find();
         res.status(200).json({
@@ -62,8 +66,22 @@ const obtenerTodoscomentarios = async (req, res) => {
             mensaje: 'Error al encontrar comentarios'
         });
     }
-};
-
+}; */
+const obtenerTodoscomentarios = async (req, res) => {
+    try {
+      const comentarios = await Foro.find().populate("usuario", "usuario"); // 👈 esto es lo importante
+      res.status(200).json({
+        mensaje: 'Se encontraron los comentarios',
+        comentarios
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(404).json({
+        mensaje: 'Error al encontrar comentarios'
+      });
+    }
+  };
+  
 const editarcomentario = async (req, res) => {
     try {
         const comentario = await Foro.findByIdAndUpdate(req.params.id, req.body, { new: true });

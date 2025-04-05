@@ -6,7 +6,11 @@ const ForoSchema = new mongoose.Schema({
         required: true,
         minlength: 3,
         maxlength: 250,
-    }
+    },
+    usuario: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "usuarios", // 👈 Este nombre debe coincidir con tu modelo de usuario
+      }
     
     
 });
