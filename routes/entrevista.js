@@ -1,12 +1,13 @@
 const { Router } = require('express');
 const { check } = require('express-validator');  // ✅ Importa correctamente
 const router = Router();
-const { crearEntrevista, editarEntrevista, eliminarEntrevista,
+const { guardarRespuestas, crearEntrevista, editarEntrevista, eliminarEntrevista,
      obtenerTodosEntrevistas, obtenerUnEntrevista}
       =require( '../controllers/entrevista')
 
 router.get('/',  obtenerTodosEntrevistas);
 router.get('/:id', obtenerUnEntrevista);
+router.post('/:id/responder', guardarRespuestas);
 
 router.post('/',[
     check('entrevistador')

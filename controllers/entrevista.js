@@ -1,5 +1,27 @@
 const Entrevista = require("../models/entrevista");
 
+const guardarRespuestas = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { respuestas } = req.body;
+
+        const entrevista = await Entrevista.findById(id);
+        if (!entrevista) {
+            return res.status(404).json({ mensaje: 'Entrevista no encontrada' });
+        }
+
+        entrevista.respuestas.push({ respuestas });
+        await entrevista.save();
+
+        res.status(200).json({
+            mensaje: 'Respuestas guardadas correctamente',
+            entrevista
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ mensaje: 'Error al guardar respuestas' });
+    }
+};
 
   const crearEntrevista = async (req, res) => {
     try {
@@ -116,5 +138,5 @@ const eliminarEntrevista = async (req, res) => {
 };
 
 module.exports = {
-    eliminarEntrevista, crearEntrevista, editarEntrevista, obtenerTodosEntrevistas, obtenerUnEntrevista
+   guardarRespuestas,  eliminarEntrevista, crearEntrevista, editarEntrevista, obtenerTodosEntrevistas, obtenerUnEntrevista
 };

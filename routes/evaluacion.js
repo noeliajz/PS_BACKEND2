@@ -4,7 +4,8 @@ const router = Router();
 const {
   crearEvaluacion,
   obtenerTodasEvaluaciones,
-  calcularNotaFinal
+  calcularNotaFinal,
+  eliminarEvaluacion
 } = require('../controllers/evaluacion');
 
 router.get('/', obtenerTodasEvaluaciones);
@@ -21,5 +22,7 @@ router.post('/', [
 ], crearEvaluacion);
 
 router.post("/calcular", calcularNotaFinal);
+router.delete('/:id', eliminarEvaluacion);
+
 
 module.exports = router;

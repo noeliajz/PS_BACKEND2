@@ -66,9 +66,25 @@ const calcularNotaFinal = async (req, res) => {
     res.status(500).json({ mensaje: "Error en el servidor" });
   }
 };
+const eliminarEvaluacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const evaluacion = await Evaluacion.findByIdAndDelete(id);
+    if (!evaluacion) {
+      return res.status(404).json({ mensaje: "Evaluación no encontrada" });
+    }
+
+    res.status(200).json({ mensaje: "Evaluación eliminada correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar Evaluación:", error);
+    res.status(500).json({ mensaje: "Error al eliminar Evaluación" });
+  }
+};
+
 
 module.exports = {
   crearEvaluacion,
   obtenerTodasEvaluaciones,
-  calcularNotaFinal
+  calcularNotaFinal, 
+  eliminarEvaluacion
 };
