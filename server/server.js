@@ -28,6 +28,8 @@ class Server {
         this.app.use('/api/simulacion', require('../routes/simulacion'));
         this.app.use('/api/video', require('../routes/video'));
         this.app.use('/api/indicador', require('../routes/indicador'));
+        this.app.use('/api/encuesta', require('../routes/encuesta'));
+
     }
 
     listen() {
