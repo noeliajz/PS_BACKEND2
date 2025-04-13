@@ -81,9 +81,62 @@ const eliminarEncuesta = async (req, res) => {
   }
 };
 
+
+const editarEncuesta = async (req, res) => {
+  const errores = validationResult(req);
+  if (!errores.isEmpty()) {
+    return res.status(400).json({ errores: errores.array() });
+  }
+
+  try {
+    const encuestaActualizada = await Encuesta.findByIdAndUpdate(
+      req.params.id,
+      {
+        encuestador: req.body.encuestador,
+        encuestado: req.body.encuestado,
+        preguntas: req.body.preguntas,
+        fecha: req.body.fecha
+      },
+      { new: true }
+    );
+
+    if (!encuestaActualizada) {
+      return res.status(404).json({ mensaje: 'Encuesta no encontrada' });
+    }
+
+    res.status(200).json({ mensaje: 'Encuesta actualizada', encuesta: encuestaActualizada });
+  } catch (error) {
+    console.error('Error al actualizar encuesta:', error);
+    res.status(500).json({ mensaje: 'Error al actualizar encuesta' });
+  }
+};
+
+
+const obtenerUnaEncuesta = async (req, res) => {
+  try {
+    // Buscar la encuesta por el ID
+    const encuesta = await Encuesta.findById(req.params.id);
+    
+    // Si la encuesta no se encuentra
+    if (!encuesta) {
+      return res.status(404).json({ mensaje: 'Encuesta no encontrada' });
+    }
+    
+    // Si la encuesta es encontrada, la retornamos con un mensaje de éxito
+    res.status(200).json({ mensaje: 'Encuesta encontrada', encuesta });
+  } catch (error) {
+    // Si ocurre un error, respondemos con un mensaje de error
+    res.status(500).json({ mensaje: 'Error al obtener encuesta', error: error.message });
+  }
+};
+
+
+
 module.exports = {
+  editarEncuesta,
   crearEncuesta,
   obtenerTodasEncuestas,
+  obtenerUnaEncuesta,
   responderEncuesta,
   eliminarEncuesta
 };
