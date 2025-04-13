@@ -71,21 +71,38 @@ const obtenerUnVideo = async (req, res) => {
 // Editar un video
 const editarVideo = async (req, res) => {
     try {
-        const videoActualizado = await Video.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!videoActualizado) {
-            return res.status(404).json({ mensaje: 'Video no encontrado' });
-        }
-        res.status(200).json({
-            mensaje: 'Video actualizado',
-            video: videoActualizado
-        });
+      const { titulo, descripcion } = req.body;
+  
+      const nuevoContenido = {
+        titulo,
+        descripcion,
+      };
+  
+      if (req.file) {
+        nuevoContenido.url = `uploads/${req.file.filename}`;
+      }
+  
+      const videoActualizado = await Video.findByIdAndUpdate(req.params.id, nuevoContenido, {
+        new: true,
+      });
+  
+      if (!videoActualizado) {
+        return res.status(404).json({ mensaje: 'Video no encontrado' });
+      }
+  
+      res.status(200).json({
+        mensaje: 'Video actualizado',
+        video: videoActualizado,
+      });
     } catch (error) {
-        console.error(error);
-        res.status(404).json({
-            mensaje: 'Error al actualizar el video'
-        });
+      console.error('Error al actualizar video:', error);
+      res.status(500).json({
+        mensaje: 'Error al actualizar el video',
+        detalles: error.message,
+      });
     }
-};
+  };
+  
 
 // Eliminar un video
 const eliminarVideo = async (req, res) => {

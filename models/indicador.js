@@ -9,8 +9,6 @@ const indicadorSchema = new mongoose.Schema({
     type: String,
     required: [true, "La fórmula del indicador es obligatoria"]
   }
-}, {
-  timestamps: true // Opcional: agrega createdAt y updatedAt
 });
 
 module.exports = mongoose.model("Indicador", indicadorSchema);
