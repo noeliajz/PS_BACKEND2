@@ -5,12 +5,15 @@ const router = Router();
 const {
   crearEncuesta,
   obtenerTodasEncuestas,
+  obtenerUnaEncuesta,
   responderEncuesta,
-  eliminarEncuesta
+  eliminarEncuesta,
+  editarEncuesta
 } = require('../controllers/encuesta');
 
 // Obtener todas las encuestas
 router.get('/', obtenerTodasEncuestas);
+router.get('/:id', obtenerUnaEncuesta);
 
 // Crear una nueva encuesta
 router.post('/', [
@@ -29,5 +32,6 @@ router.post('/:id/responder', [
 
 // Eliminar una encuesta
 router.delete('/:id', eliminarEncuesta);
+router.put('/:id', editarEncuesta);
 
 module.exports = router;
