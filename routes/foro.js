@@ -15,13 +15,7 @@ router.post('/',[
     .isLength({min:3 , max: 250 })
     .withMessage(' el campo nombre debe tener entre 3 y 250 caracteres máximo')
 ], verificarToken, crearcomentario),
-router.put('/:id', [
-    check('comentario')
-    .notEmpty()
-    .withMessage('el campo nombre esta vacio')
-    .isLength({min:3 , max: 250 })
-    .withMessage(' el campo nombre debe tener entre 3 y 250 caracteres máximo')    
-], editarcomentario)
+router.put('/:id', editarcomentario)
     
     
 

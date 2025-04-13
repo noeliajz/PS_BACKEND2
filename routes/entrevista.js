@@ -1,33 +1,28 @@
 const { Router } = require('express');
-const { check } = require('express-validator');  // ✅ Importa correctamente
-const router = Router();
-const { guardarRespuestas, crearEntrevista, editarEntrevista, eliminarEntrevista,
-     obtenerTodosEntrevistas, obtenerUnEntrevista}
-      =require( '../controllers/entrevista')
+const { check } = require('express-validator');
+const {
+  guardarRespuestas,
+  crearEntrevista,
+  editarEntrevista,
+  eliminarEntrevista,
+  obtenerTodosEntrevistas,
+  obtenerUnEntrevista
+} = require('../controllers/entrevista');
 
-router.get('/',  obtenerTodosEntrevistas);
+const router = Router();
+
+router.get('/', obtenerTodosEntrevistas);
 router.get('/:id', obtenerUnEntrevista);
 router.post('/:id/responder', guardarRespuestas);
 
-router.post('/',[
-    check('entrevistador')
-    .notEmpty()
-    .withMessage('el campo entrevistador esta vacio'),
-    check('entrevistado')
-    .notEmpty()
-    .withMessage('el campo entrevistado esta vacio'),
-    check('preguntas')
-    .notEmpty()
-    .withMessage('el campo preguntas esta vacio'),
-    check('fecha')
-    .notEmpty()
-    .withMessage('el campo fecha esta vacio')
-    .isDate()
-    .withMessage(' debe ser del tipo fecha ')
-], crearEntrevista),
-router.put('/:id', editarEntrevista)
+router.post('/', [
+  check('entrevistador').notEmpty().withMessage('El campo entrevistador está vacío'),
+  check('entrevistado').notEmpty().withMessage('El campo entrevistado está vacío'),
+  check('preguntas').isArray().withMessage('El campo preguntas debe ser un array'),
+  check('fecha').notEmpty().withMessage('El campo fecha está vacío').isISO8601().withMessage('Debe ser una fecha válida')
+], crearEntrevista);
+
+router.put('/:id', editarEntrevista);
 router.delete('/:id', eliminarEntrevista);
 
-    
-
-module.exports= router
+module.exports = router;

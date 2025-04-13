@@ -5,10 +5,13 @@ const {
   crearEvaluacion,
   obtenerTodasEvaluaciones,
   calcularNotaFinal,
-  eliminarEvaluacion
+  eliminarEvaluacion,
+  editarEvaluacion,
+  obtenerEvaluacionPorId
 } = require('../controllers/evaluacion');
 
 router.get('/', obtenerTodasEvaluaciones);
+router.get('/:id', obtenerEvaluacionPorId);
 
 router.post('/', [
   check('titulo').notEmpty().withMessage('El campo título está vacío'),
@@ -23,6 +26,7 @@ router.post('/', [
 
 router.post("/calcular", calcularNotaFinal);
 router.delete('/:id', eliminarEvaluacion);
+router.put('/:id', editarEvaluacion);
 
 
 module.exports = router;

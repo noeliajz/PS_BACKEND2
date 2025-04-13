@@ -82,9 +82,52 @@ const eliminarEvaluacion = async (req, res) => {
 };
 
 
+const editarEvaluacion = async (req, res) => {
+  try {
+    const evaluacion = await Evaluacion.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    if (!evaluacion) {
+      return res.status(404).json({ mensaje: 'Evaluación no encontrada' });
+    }
+
+    res.status(200).json({
+      mensaje: 'Evaluación actualizada correctamente',
+      evaluacion
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: 'Error al actualizar la evaluación'
+    });
+  }
+};
+
+const obtenerEvaluacionPorId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const evaluacion = await Evaluacion.findById(id);
+
+    if (!evaluacion) {
+      return res.status(404).json({ mensaje: "Evaluación no encontrada" });
+    }
+
+    res.status(200).json({ mensaje: "Evaluación encontrada", evaluacion });
+  } catch (error) {
+    console.error("Error al obtener Evaluación por ID:", error);
+    res.status(500).json({ mensaje: "Error al obtener Evaluación" });
+  }
+};
+
+
 module.exports = {
+  obtenerEvaluacionPorId,
   crearEvaluacion,
   obtenerTodasEvaluaciones,
   calcularNotaFinal, 
-  eliminarEvaluacion
+  eliminarEvaluacion,
+  editarEvaluacion
 };

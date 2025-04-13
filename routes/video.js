@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 const router = Router();
-const upload = require('../middleware/upload'); // El middleware multer que mencionamos antes
+const upload = require('../middleware/upload'); // multer configurado
 
 const {
     crearVideo,
@@ -17,23 +17,24 @@ router.get('/', obtenerTodosVideos);
 // Obtener un video por ID
 router.get('/:id', obtenerUnVideo);
 
-// Crear un nuevo video (subida de archivo + datos)
-router.post('/', 
-    upload.single('video'), // middleware para manejar la subida del archivo
+// Crear un nuevo video (con archivo)
+router.post('/',
+    upload.single('video'),
     [
         check('titulo')
             .notEmpty()
             .withMessage('El campo título está vacío'),
-        check('url')
-            .optional(), // El campo `url` se genera automáticamente con `req.file.path`
-        check('descripcion')
-            .optional()
+        check('url').optional(),
+        check('descripcion').optional()
     ],
     crearVideo
 );
 
-// Editar un video existente
-router.put('/:id', editarVideo);
+// Editar un video (también puede tener archivo)
+router.put('/:id',
+    upload.single('video'), // ← aquí aplicamos multer
+    editarVideo
+);
 
 // Eliminar un video
 router.delete('/:id', eliminarVideo);

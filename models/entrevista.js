@@ -1,15 +1,31 @@
 const mongoose = require('mongoose');
 
+const RespuestaSchema = new mongoose.Schema({
+  pregunta: String,
+  respuesta: String
+}, { _id: false }); // _id: false evita crear un _id para cada subdocumento
+
 const EntrevistaSchema = new mongoose.Schema({
-    entrevistador: { type: String, required: true },
-    entrevistado: { type: String, required: true },
-    preguntas: { type: [String], required: true },
-    respuestas: [{
-        respuestas: [String],
-        fecha: { type: Date, default: Date.now }
-    }],
-    fecha: { type: Date, default: Date.now }
+  entrevistador: {
+    type: String,
+    required: true,
+  },
+  entrevistado: {
+    type: String,
+    required: true,
+  },
+  preguntas: {
+    type: [String],
+    required: true,
+  },
+  fecha: {
+    type: Date,
+    required: true,
+  },
+  respuestas: {
+    type: [RespuestaSchema],
+    default: []
+  }
 });
 
-const Entrevista = mongoose.model('Entrevista', EntrevistaSchema);
-module.exports = Entrevista;
+module.exports = mongoose.model('Entrevista', EntrevistaSchema);
