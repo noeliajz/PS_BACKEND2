@@ -1,142 +1,104 @@
+const { validationResult } = require('express-validator');
 const Entrevista = require("../models/entrevista");
 
 const guardarRespuestas = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { respuestas } = req.body;
+  try {
+    const { id } = req.params;
+    const { respuestas } = req.body;
 
-        const entrevista = await Entrevista.findById(id);
-        if (!entrevista) {
-            return res.status(404).json({ mensaje: 'Entrevista no encontrada' });
-        }
-
-        entrevista.respuestas.push({ respuestas });
-        await entrevista.save();
-
-        res.status(200).json({
-            mensaje: 'Respuestas guardadas correctamente',
-            entrevista
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ mensaje: 'Error al guardar respuestas' });
+    // Validación adicional opcional
+    if (!Array.isArray(respuestas) || respuestas.length === 0) {
+      return res.status(400).json({ mensaje: 'Respuestas inválidas o vacías' });
     }
+
+    const entrevista = await Entrevista.findById(id);
+    if (!entrevista) {
+      return res.status(404).json({ mensaje: 'Entrevista no encontrada' });
+    }
+
+    entrevista.respuestas.push({ respuestas });
+    await entrevista.save();
+
+    res.status(200).json({ mensaje: 'Respuestas guardadas', entrevista });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ mensaje: 'Error al guardar respuestas' });
+  }
 };
 
-  const crearEntrevista = async (req, res) => {
-    try {
-        const nuevoEntrevista = new Entrevista(req.body);
-        await nuevoEntrevista.save();
+const crearEntrevista = async (req, res) => {
+  const errores = validationResult(req);
+  if (!errores.isEmpty()) {
+    return res.status(400).json({ errores: errores.array() });
+  }
 
-        res.status(201).json({
-            mensaje: 'Se creó el Entrevista con éxito',
-            Entrevista: nuevoEntrevista
-        });
-    } catch (error) {
-        console.error('Error al crear Entrevista:', error);
-        res.status(400).json({
-            mensaje: 'Error al crear Entrevista',
-            detalles: error.errors || error.message
-        });
-    }
-}; 
-
-/* const crearEntrevista = async (req, res) => {
-    try {
-        const { Entrevista } = req.body;
-        
-        // Buscar si el Entrevista ya existe
-        let EntrevistaExistente = await Entrevista.findOne({ Entrevista });
-        
-        
-
-        // Si el Entrevista no existe, crearlo
-        const nuevoEntrevista = new Entrevista(req.body);
-        await nuevoEntrevista.save();
-
-        res.status(201).json({
-            mensaje: 'Se creó el Entrevista con éxito',
-            Entrevista: nuevoEntrevista
-        });
-    } catch (error) {
-        console.error('Error al crear o actualizar Entrevista:', error);
-        res.status(400).json({
-            mensaje: 'Error al crear o actualizar Entrevista',
-            detalles: error.errors || error.message
-        });
-    }
-}; */
-
-
-
-const obtenerTodosEntrevistas = async (req, res) => {
-    try {
-        const Entrevistas = await Entrevista.find();
-        res.status(200).json({
-            mensaje: 'Se encontraron los Entrevistas',
-            Entrevistas
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(404).json({
-            mensaje: 'Error al encontrar Entrevistas'
-        });
-    }
+  try {
+    const nueva = new Entrevista(req.body);
+    await nueva.save();
+    res.status(201).json({ mensaje: 'Entrevista creada', entrevista: nueva });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ mensaje: 'Error al crear entrevista', detalles: error.message });
+  }
 };
 
 const editarEntrevista = async (req, res) => {
-    try {
-        const entrevista = await Entrevista.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!entrevista) {
-            return res.status(404).json({ mensaje: 'Entrevista no encontrado' });
-        }
-        res.status(200).json({
-            mensaje: 'Entrevista actualizado',
-            entrevista
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(404).json({
-            mensaje: 'Error al actualizar el Entrevista'
-        });
-    }
-};
+  const errores = validationResult(req);
+  if (!errores.isEmpty()) {
+    return res.status(400).json({ errores: errores.array() });
+  }
 
-const obtenerUnEntrevista = async (req, res) => {
-    try {
-        const entrevista = await Entrevista.findById(req.params.id);
-        if (!entrevista) {
-            return res.status(404).json({ mensaje: 'Entrevista no encontrado' });
-        }
-        res.status(200).json({
-            mensaje: 'Entrevista encontrado',
-            entrevista
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(404).json({
-            mensaje: 'Error al encontrar el Entrevista'
-        });
+  try {
+    const entrevista = await Entrevista.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!entrevista) {
+      return res.status(404).json({ mensaje: 'Entrevista no encontrada' });
     }
+    res.status(200).json({ mensaje: 'Entrevista actualizada', entrevista });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al actualizar entrevista' });
+  }
 };
 
 const eliminarEntrevista = async (req, res) => {
-    try {
-        const entrevista = await Entrevista.findByIdAndDelete(req.params.id);
-        if (!entrevista) {
-            return res.status(404).json({ mensaje: 'Entrevista no encontrado' });
-        }
-        res.status(200).json({
-            mensaje: 'Entrevista eliminado'
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(404).json({
-            mensaje: 'Error al eliminar el Entrevista'
-        });
+  try {
+    const entrevista = await Entrevista.findByIdAndDelete(req.params.id);
+    if (!entrevista) {
+      return res.status(404).json({ mensaje: 'Entrevista no encontrada' });
     }
+    res.status(200).json({ mensaje: 'Entrevista eliminada' });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al eliminar entrevista' });
+  }
+};
+
+const obtenerTodosEntrevistas = async (req, res) => {
+  try {
+    const entrevistas = await Entrevista.find();
+    // Corregido: ahora devuelve "Entrevistas" con mayúscula como espera el frontend
+    res.status(200).json({ mensaje: 'Entrevistas encontradas', Entrevistas: entrevistas });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al obtener entrevistas' });
+  }
+};
+
+const obtenerUnEntrevista = async (req, res) => {
+  try {
+    const entrevista = await Entrevista.findById(req.params.id);
+    if (!entrevista) {
+      return res.status(404).json({ mensaje: 'Entrevista no encontrada' });
+    }
+    res.status(200).json({ mensaje: 'Entrevista encontrada', entrevista });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al obtener entrevista' });
+  }
 };
 
 module.exports = {
-   guardarRespuestas,  eliminarEntrevista, crearEntrevista, editarEntrevista, obtenerTodosEntrevistas, obtenerUnEntrevista
+  guardarRespuestas,
+  crearEntrevista,
+  editarEntrevista,
+  eliminarEntrevista,
+  obtenerTodosEntrevistas,
+  obtenerUnEntrevista
 };
